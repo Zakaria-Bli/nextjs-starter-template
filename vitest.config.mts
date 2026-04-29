@@ -16,8 +16,13 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     clearMocks: true,
+    reporters: process.env.CI ? ["verbose", "github-actions"] : ["default"],
     coverage: {
       provider: "v8",
+      reporter: process.env.CI
+        ? ["text", "text-summary", "json-summary"]
+        : ["text", "text-summary"],
+      reportOnFailure: true,
       reportsDirectory: "./coverage",
       include: ["src/**/*.{js,jsx,ts,tsx}"],
       exclude: [
