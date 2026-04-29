@@ -29,10 +29,10 @@ Already included:
 - PNPM as the package manager
 - React Compiler enabled in `next.config.ts`
 - Docker support with a multi-stage Dockerfile and Compose template
+- GitHub Actions CI for linting, formatting, type checking, tests, and builds
 
 Planned or in progress:
 
-- CI workflows
 - Additional project conventions and automation
 
 ## Stack
@@ -96,7 +96,7 @@ Custom rules include:
 - `no-console` warns by default, while allowing `console.warn` and `console.error`
 - `@typescript-eslint/naming-convention` enforces consistent naming for variables, functions, and type-like symbols
 - `import/order` enforces grouped and alphabetized imports
-- `import/no-restricted-paths` enforces using the `@/*` alias instead of relative imports within `src`
+- `no-restricted-imports` enforces using the `@/*` alias instead of parent-relative imports
 
 Commands:
 
@@ -171,7 +171,36 @@ Environment values for tests are provided through `.env.test`.
 
 `.env.test` is required to run Vitest in this repository. Next.js does not load `.env.local` when `NODE_ENV=test`, so tests will fail unless `.env.test` defines the required values, currently `NEXT_PUBLIC_APP_BASE_URL`.
 
-At the moment, the test runner is configured, but the repository currently does not include any committed test files, so `pnpm test` exits with `No test files found` until tests are added.
+The repository includes a committed smoke test for environment loading under `src/lib/env/__tests__/env.test.ts`.
+
+### Continuous Integration
+
+CI is configured with GitHub Actions in `.github/workflows/ci.yml`.
+
+The workflow runs on:
+
+- Pushes to `main` and `staging`
+- Pull requests targeting any branch
+
+A concurrency group cancels older in-progress runs for the same Git ref when a newer run starts.
+
+CI jobs:
+
+| Job           | Commands                         | Notes                                                                     |
+| ------------- | -------------------------------- | ------------------------------------------------------------------------- |
+| Lint & Format | `pnpm lint`, `pnpm format:check` | Runs ESLint and verifies Prettier formatting                              |
+| Type Check    | `pnpm type-check`                | Runs TypeScript with `tsc --noEmit`                                       |
+| Unit Tests    | `pnpm test:coverage`             | Generates `.env.test` first with `.github/scripts/generate-env-test.sh`   |
+| Build         | `pnpm build`                     | Runs after linting, type checking, and tests pass; restores `.next/cache` |
+
+All CI jobs use the local composite action in `.github/actions/setup`, which installs PNPM 10.30.0, sets up Node.js 22 with PNPM caching, and installs dependencies with `pnpm install --frozen-lockfile`.
+
+The test job generates a safe `.env.test` file in CI with:
+
+- `NODE_ENV=test`
+- `NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000`
+
+Because CI runs Vitest coverage, the committed environment smoke test prevents the `Unit Tests` job from failing due to an empty test suite.
 
 ### Git Hooks
 
@@ -270,17 +299,17 @@ The root layout uses `next/font/google` with:
 
 This section is intentionally separated so it can grow over time.
 
-| Area               | Status           | Notes                      |
-| ------------------ | ---------------- | -------------------------- |
-| Next.js App Router | Included         | `src/app` based structure  |
-| TypeScript         | Included         | Strict configuration       |
-| ESLint             | Included         | Flat config + custom rules |
-| Prettier           | Included         | Project-wide formatting    |
-| Git hooks          | Included         | Husky + lint-staged        |
-| Environment vars   | Included         | T3 Env + Zod               |
-| Testing            | Included         | Vitest + Testing Library   |
-| Docker             | Included         | Standalone image + Compose |
-| CI                 | Not yet included | Planned                    |
+| Area               | Status   | Notes                      |
+| ------------------ | -------- | -------------------------- |
+| Next.js App Router | Included | `src/app` based structure  |
+| TypeScript         | Included | Strict configuration       |
+| ESLint             | Included | Flat config + custom rules |
+| Prettier           | Included | Project-wide formatting    |
+| Git hooks          | Included | Husky + lint-staged        |
+| Environment vars   | Included | T3 Env + Zod               |
+| Testing            | Included | Vitest + Testing Library   |
+| Docker             | Included | Standalone image + Compose |
+| CI                 | Included | GitHub Actions workflow    |
 
 ## Getting Started
 
@@ -399,7 +428,7 @@ pnpm test:watch
 pnpm test:coverage
 ```
 
-If no test files exist yet, Vitest exits with `No test files found`.
+The repository includes a committed environment smoke test so the default test command has at least one test file to run.
 
 ## Available Scripts
 
@@ -446,6 +475,8 @@ cp .env.example .env.test
 ```
 
 `.env.test` is required for the Vitest setup in this repository. It is ignored by git with the other `.env*` files, so create it locally before running tests.
+
+CI generates `.env.test` automatically before running coverage; local test runs still require creating it yourself.
 
 When adding new environment variables, update:
 
