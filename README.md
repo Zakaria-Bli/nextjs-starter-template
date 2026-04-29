@@ -28,10 +28,10 @@ Already included:
 - Environment validation with T3 Env and Zod
 - PNPM as the package manager
 - React Compiler enabled in `next.config.ts`
+- Docker support with a multi-stage Dockerfile and Compose template
 
 Planned or in progress:
 
-- Docker support
 - CI workflows
 - Additional project conventions and automation
 
@@ -279,7 +279,7 @@ This section is intentionally separated so it can grow over time.
 | Git hooks          | Included         | Husky + lint-staged        |
 | Environment vars   | Included         | T3 Env + Zod               |
 | Testing            | Included         | Vitest + Testing Library   |
-| Docker             | Not yet included | Planned                    |
+| Docker             | Included         | Standalone image + Compose |
 | CI                 | Not yet included | Planned                    |
 
 ## Getting Started
@@ -313,7 +313,7 @@ The example file currently defines:
 - `NODE_ENV`
 - `NEXT_PUBLIC_APP_BASE_URL`
 
-`.env.local` is used for local app development. `.env.test` is required for `pnpm test` and `pnpm test:coverage`.
+`.env.local` is used for local app development and as the runtime env file in the current Docker Compose template. `.env.test` is required for `pnpm test` and `pnpm test:coverage`.
 
 ### Start the Development Server
 
@@ -333,6 +333,51 @@ pnpm build
 
 ```bash
 pnpm start
+```
+
+### Run With Docker
+
+The `Dockerfile` is a multi-stage build with two usable targets:
+
+| Target   | Purpose                               |
+| -------- | ------------------------------------- |
+| `dev`    | Development server with hot-reload    |
+| `runner` | Production-optimised standalone image |
+
+`docker-compose.yml` ships configured for **production** by default.
+
+#### Production
+
+```bash
+docker compose up --build
+```
+
+Or build and run the image directly:
+
+```bash
+docker build --target runner -t nextjs-starter-template .
+docker run --rm -p 3000:3000 --env-file .env.local nextjs-starter-template
+```
+
+#### Development
+
+To use Docker for development, edit `docker-compose.yml` with the following changes:
+
+- Change `target` from `runner` to `dev`
+- Change `NODE_ENV` from `production` to `development`
+- Add a `volumes` block to mount your source code into the container:
+
+```yaml
+volumes:
+  - .:/app
+  - /app/node_modules
+  - /app/.next
+```
+
+Then start the container:
+
+```bash
+docker compose up --build
 ```
 
 ### Run Linting
