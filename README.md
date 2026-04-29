@@ -23,6 +23,7 @@ Already included:
 - Tailwind CSS 4
 - ESLint 9 with custom project rules
 - Prettier 3 with Tailwind-aware formatting
+- Vitest 4 with Testing Library and jsdom
 - Husky, lint-staged, and commitlint Git hooks
 - Environment validation with T3 Env and Zod
 - PNPM as the package manager
@@ -30,7 +31,6 @@ Already included:
 
 Planned or in progress:
 
-- Testing setup
 - Docker support
 - CI workflows
 - Additional project conventions and automation
@@ -42,6 +42,8 @@ Planned or in progress:
 - TypeScript `^5`
 - Tailwind CSS `^4`
 - ESLint `^9`
+- Vitest `^4`
+- Testing Library `^16`
 - PNPM `10.30.0`
 - Node.js `>=22.12.0`
 
@@ -124,6 +126,53 @@ pnpm format
 pnpm format:check
 ```
 
+### Testing
+
+Testing is configured with Vitest and React Testing Library.
+
+Current setup includes:
+
+- `vitest.config.mts` with the `@vitejs/plugin-react` plugin
+- `jsdom` as the test environment for component and DOM testing
+- `globals: true` so Vitest globals like `describe`, `it`, and `expect` are available without imports
+- `vitest.setup.ts` loading `@testing-library/jest-dom/vitest`
+- `@next/env` loading environment variables before tests run
+- V8 coverage reporting written to `coverage/`
+
+TypeScript is already configured for the test environment with:
+
+- `vitest/globals`
+- `@testing-library/jest-dom`
+
+Commands:
+
+```bash
+pnpm test
+pnpm test:watch
+pnpm test:coverage
+```
+
+Test files should use Vitest naming conventions such as:
+
+- `*.test.ts`
+- `*.test.tsx`
+- `*.spec.ts`
+- `*.spec.tsx`
+
+Coverage currently includes `src/**/*.{js,jsx,ts,tsx}` and excludes:
+
+- declaration files
+- test files
+- `src/**/__tests__/**`
+- `src/app/layout.tsx`
+- `src/lib/env/**`
+
+Environment values for tests are provided through `.env.test`.
+
+`.env.test` is required to run Vitest in this repository. Next.js does not load `.env.local` when `NODE_ENV=test`, so tests will fail unless `.env.test` defines the required values, currently `NEXT_PUBLIC_APP_BASE_URL`.
+
+At the moment, the test runner is configured, but the repository currently does not include any committed test files, so `pnpm test` exits with `No test files found` until tests are added.
+
 ### Git Hooks
 
 Git hooks are managed with Husky and installed automatically by `pnpm install` through the `prepare` script.
@@ -178,6 +227,7 @@ Implementation details:
 - `client` is used for browser-safe variables and requires the `NEXT_PUBLIC_` prefix
 - `experimental__runtimeEnv` maps runtime values for client-safe access in Next.js
 - `emptyStringAsUndefined: true` treats empty environment values as missing
+- `.env.test` provides the baseline environment required by the Vitest setup and must exist locally for test runs
 
 Use the exported `env` object instead of reading `process.env` directly in app code:
 
@@ -228,7 +278,7 @@ This section is intentionally separated so it can grow over time.
 | Prettier           | Included         | Project-wide formatting    |
 | Git hooks          | Included         | Husky + lint-staged        |
 | Environment vars   | Included         | T3 Env + Zod               |
-| Testing            | Not yet included | Planned                    |
+| Testing            | Included         | Vitest + Testing Library   |
 | Docker             | Not yet included | Planned                    |
 | CI                 | Not yet included | Planned                    |
 
@@ -255,12 +305,15 @@ pnpm install
 
 ```bash
 cp .env.example .env.local
+cp .env.example .env.test
 ```
 
 The example file currently defines:
 
 - `NODE_ENV`
 - `NEXT_PUBLIC_APP_BASE_URL`
+
+`.env.local` is used for local app development. `.env.test` is required for `pnpm test` and `pnpm test:coverage`.
 
 ### Start the Development Server
 
@@ -288,21 +341,39 @@ pnpm start
 pnpm lint
 ```
 
+### Run Tests
+
+```bash
+pnpm test
+```
+
+For watch mode or coverage:
+
+```bash
+pnpm test:watch
+pnpm test:coverage
+```
+
+If no test files exist yet, Vitest exits with `No test files found`.
+
 ## Available Scripts
 
 Current scripts from `package.json`:
 
-| Script              | Description                          |
-| ------------------- | ------------------------------------ |
-| `pnpm dev`          | Start the Next.js development server |
-| `pnpm build`        | Create a production build            |
-| `pnpm start`        | Run the production server            |
-| `pnpm lint`         | Run ESLint                           |
-| `pnpm lint:fix`     | Run ESLint with auto-fixes           |
-| `pnpm format`       | Format files with Prettier           |
-| `pnpm format:check` | Check formatting with Prettier       |
-| `pnpm type-check`   | Run TypeScript type checking         |
-| `pnpm prepare`      | Install Husky Git hooks              |
+| Script               | Description                          |
+| -------------------- | ------------------------------------ |
+| `pnpm dev`           | Start the Next.js development server |
+| `pnpm build`         | Create a production build            |
+| `pnpm start`         | Run the production server            |
+| `pnpm lint`          | Run ESLint                           |
+| `pnpm lint:fix`      | Run ESLint with auto-fixes           |
+| `pnpm format`        | Format files with Prettier           |
+| `pnpm format:check`  | Check formatting with Prettier       |
+| `pnpm test`          | Run the Vitest test suite            |
+| `pnpm test:watch`    | Run Vitest in watch mode             |
+| `pnpm test:coverage` | Run tests with coverage reporting    |
+| `pnpm type-check`    | Run TypeScript type checking         |
+| `pnpm prepare`       | Install Husky Git hooks              |
 
 ## Project Notes
 
@@ -326,12 +397,16 @@ Use `.env.example` as the starting point for local configuration:
 
 ```bash
 cp .env.example .env.local
+cp .env.example .env.test
 ```
+
+`.env.test` is required for the Vitest setup in this repository. It is ignored by git with the other `.env*` files, so create it locally before running tests.
 
 When adding new environment variables, update:
 
 - `.env.example`
 - `.env.local`
+- `.env.test` if tests need the variable
 - `src/lib/env/index.ts`
 
 ## Contributing To The Template
