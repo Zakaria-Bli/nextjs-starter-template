@@ -43,15 +43,7 @@ const eslintConfig = defineConfig(
       "import/order": [
         "error",
         {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-            "type",
-          ],
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
           "newlines-between": "always",
           pathGroupsExcludedImportTypes: ["builtin"],
           alphabetize: {
@@ -61,15 +53,13 @@ const eslintConfig = defineConfig(
         },
       ],
 
-      "import/no-restricted-paths": [
+      "no-restricted-imports": [
         "error",
         {
-          zones: [
+          patterns: [
             {
-              target: "./src/**/*",
-              from: "./src/**/*",
-              except: ["./*", "**/*.css"],
-              message: "Use the @ alias instead of relative paths.",
+              group: ["../*", "../**/*"],
+              message: "Use the @ alias instead of relative parent imports.",
             },
           ],
         },
