@@ -1,0 +1,22 @@
+# If using docker for development:
+# - Change target to: dev
+# - Set NODE_ENV=development
+# - Add these volumes to the service:
+# volumes:
+#   - .:/app
+#   - /app/node_modules
+#   - /app/.next
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local # don't forget to create your environment variables file
+    environment:
+      - NODE_ENV=production
