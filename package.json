@@ -18,7 +18,9 @@
     "prepare": "husky",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "audit:dependencies": "pnpm audit --audit-level moderate",
+    "clean": "node -e \"require('node:fs').rmSync('.next',{recursive:true,force:true});require('node:fs').rmSync('coverage',{recursive:true,force:true})\""
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,tsx}": [
@@ -62,5 +64,10 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.10"
+    }
   }
 }

@@ -14,4 +14,10 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_BASE_URL: process.env.NEXT_PUBLIC_APP_BASE_URL,
   },
   emptyStringAsUndefined: true,
+
+  // Skip Zod validation when SKIP_ENV_VALIDATION is set (e.g. CI builds,
+  // Docker builds without real values). Validation still runs at runtime
+  // when the server starts, so misconfigurations are caught before serving
+  // any traffic.
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 })

@@ -1,75 +1,140 @@
 # Next.js Starter Template
 
-Opinionated starter template for building modern Next.js applications with a solid baseline for code quality, maintainability, and future project setup.
+A production-ready starter template for building modern Next.js applications. Provides a clean, opinionated foundation with sensible defaults for code quality, security, testing, CI/CD, and developer experience — so you can skip the boilerplate and focus on building.
 
-This repository is being evolved into a reusable template. The goal is to provide a clean starting point with sensible defaults for application structure, linting, formatting, testing, Git hooks, Docker, CI, and related tooling as they are added.
+## Features
 
-## Goals
-
-- Start from a minimal but production-minded Next.js foundation
-- Standardize code quality and developer experience across projects
-- Keep configuration explicit and easy to understand
-- Make the template easy to extend as more tooling is introduced
-
-## Current Status
-
-The repository is currently in an early stage.
-
-Already included:
-
-- Next.js 16 with the App Router
-- React 19
-- TypeScript with strict mode enabled
-- Tailwind CSS 4
-- ESLint 9 with custom project rules
-- Prettier 3 with Tailwind-aware formatting
-- Vitest 4 with Testing Library and jsdom
-- Husky, lint-staged, and commitlint Git hooks
-- Environment validation with T3 Env and Zod
-- PNPM as the package manager
-- React Compiler enabled in `next.config.ts`
-- Docker support with a multi-stage Dockerfile and Compose template
-- GitHub Actions CI for linting, formatting, type checking, tests, and builds
-
-Planned or in progress:
-
-- Additional project conventions and automation
+- **Next.js 16** with App Router and standalone output
+- **React 19** with the React Compiler enabled
+- **TypeScript** in strict mode
+- **Tailwind CSS 4** with theme tokens and dark mode support
+- **ESLint 9** with flat config and custom project rules
+- **Prettier 3** with Tailwind-aware formatting
+- **Vitest 4** with React Testing Library, jsdom, and V8 coverage
+- **Security headers** — HSTS, CSP with per-request nonces, COOP, COEP, and more
+- **Error boundaries** — custom `error`, `not-found`, `forbidden`, `unauthorized`, and `global-error` pages
+- **SEO** — programmatic `robots.ts` and `sitemap.ts`
+- **Environment validation** with T3 Env and Zod
+- **Git hooks** — Husky, lint-staged, Commitlint, and branch name enforcement
+- **Docker** — multi-stage Dockerfile with dev and production targets, plus Compose
+- **CI/CD** — GitHub Actions for linting, type checking, tests, builds, dependency audits, and CodeQL analysis
+- **Dependabot** — automated dependency updates for npm, GitHub Actions, and Docker
+- **API routes** — `/api/health` endpoint (used by Docker healthcheck)
+- **PNPM** as the package manager
 
 ## Stack
 
-- Next.js `16.2.4`
-- React `19.2.4`
-- TypeScript `^5`
-- Tailwind CSS `^4`
-- ESLint `^9`
-- Vitest `^4`
-- Testing Library `^16`
-- PNPM `10.30.0`
-- Node.js `>=22.12.0`
+| Technology      | Version     |
+| --------------- | ----------- |
+| Next.js         | `16.2.4`    |
+| React           | `19.2.4`    |
+| TypeScript      | `^5`        |
+| Tailwind CSS    | `^4`        |
+| ESLint          | `^9`        |
+| Vitest          | `^4`        |
+| Testing Library | `^16`       |
+| PNPM            | `10.30.0`   |
+| Node.js         | `>=22.12.0` |
 
-## Included Configuration
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) `>=22.12.0`
+- [PNPM](https://pnpm.io/) `10.30.0`
+
+If you use [Corepack](https://nodejs.org/api/corepack.html), enable PNPM with:
+
+```bash
+corepack enable
+```
+
+### Installation
+
+```bash
+pnpm install
+```
+
+### Environment Variables
+
+Copy the example file to create your local environment files:
+
+```bash
+cp .env.example .env.local
+cp .env.example .env.test
+```
+
+The example file defines:
+
+- `NODE_ENV` — runtime environment (`development` / `production` / `test`)
+- `NEXT_PUBLIC_APP_BASE_URL` — public base URL for the application
+
+`.env.local` is used for local development and as the runtime env file in the Docker Compose template. `.env.test` is required for running tests.
+
+> **Note:** When adding new environment variables, update `.env.example`, `.env.local`, `.env.test` (if needed), and `src/lib/env/index.ts`.
+
+### Development
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Production Build
+
+```bash
+pnpm build
+```
+
+To skip T3 Env validation at build time (e.g. in CI or Docker where env vars may not be available):
+
+```bash
+SKIP_ENV_VALIDATION=1 pnpm build
+```
+
+Validation still runs when the server starts, so misconfigurations are caught before serving traffic.
+
+### Start the Production Server
+
+```bash
+pnpm start
+```
+
+## Configuration
 
 ### App Structure
-
-The project currently uses the App Router under `src/app`:
 
 ```text
 src/
   app/
-    favicon.ico
-    globals.css
-    layout.tsx
-    page.tsx
+    api/
+      health/route.ts          # Health check endpoint
+    error.tsx                   # Error boundary
+    forbidden.tsx               # 403 page (requires authInterrupts)
+    global-error.tsx            # Root error boundary
+    globals.css                 # Tailwind imports and theme tokens
+    layout.tsx                  # Root layout with Geist fonts
+    loading.tsx                 # Loading state
+    not-found.tsx               # 404 page
+    page.tsx                    # Home page
+    robots.ts                   # Programmatic robots.txt
+    sitemap.ts                  # Programmatic sitemap.xml
+    unauthorized.tsx            # 401 page (requires authInterrupts)
   lib/
     env/
-      index.ts
+      __tests__/env.test.ts     # Environment smoke test
+      index.ts                  # T3 Env + Zod validation
+    security/
+      headers.ts                # Security header builders
+  proxy.ts                      # Per-request CSP nonce injection
 ```
 
 The `@/*` path alias is configured in `tsconfig.json` and maps to `src/*`.
 
 ### TypeScript
 
-TypeScript is configured with a strict baseline in `tsconfig.json`.
+Configured with a strict baseline in `tsconfig.json`.
 
 Notable settings:
 
@@ -81,7 +146,7 @@ Notable settings:
 
 ### ESLint
 
-Linting is configured in `eslint.config.mjs` using the flat config format.
+Linting uses the flat config format in `eslint.config.mjs`.
 
 Current setup includes:
 
@@ -91,25 +156,23 @@ Current setup includes:
 - `eslint-plugin-import`
 - Explicit global ignores for build artifacts, generated files, and `src/components/ui/**/*`
 
-Custom rules include:
+Custom rules:
 
-- `no-console` warns by default, while allowing `console.warn` and `console.error`
-- `@typescript-eslint/naming-convention` enforces consistent naming for variables, functions, and type-like symbols
-- `import/order` enforces grouped and alphabetized imports
-- `no-restricted-imports` enforces using the `@/*` alias instead of parent-relative imports
-
-Commands:
+- `no-console` — warns by default, allows `console.warn` and `console.error`
+- `@typescript-eslint/naming-convention` — enforces consistent naming for variables, functions, and type-like symbols
+- `import/order` — enforces grouped and alphabetized imports
+- `no-restricted-imports` — enforces the `@/*` alias instead of parent-relative imports (`../`)
 
 ```bash
-pnpm lint
-pnpm lint:fix
+pnpm lint        # check
+pnpm lint:fix    # auto-fix
 ```
 
 ### Prettier
 
 Formatting is configured in `prettier.config.mjs`.
 
-Current rules include:
+Current rules:
 
 - `semi: false`
 - `singleQuote: false`
@@ -119,131 +182,97 @@ Current rules include:
 - `prettier-plugin-tailwindcss`
 - `prettier-plugin-tailwindcss-canonical-classes`
 
-Commands:
-
 ```bash
-pnpm format
-pnpm format:check
+pnpm format        # write
+pnpm format:check  # check only
 ```
 
-### Testing
+### Tailwind CSS
 
-Testing is configured with Vitest and React Testing Library.
+Tailwind CSS 4 is configured through `postcss.config.mjs` and imported in `src/app/globals.css`.
 
-Current setup includes:
+The template uses:
 
-- `vitest.config.mts` with the `@vitejs/plugin-react` plugin
-- `jsdom` as the test environment for component and DOM testing
-- `globals: true` so Vitest globals like `describe`, `it`, and `expect` are available without imports
-- `vitest.setup.ts` loading `@testing-library/jest-dom/vitest`
-- `@next/env` loading environment variables before tests run
-- V8 coverage reporting written to `coverage/`
+- `@import "tailwindcss"`
+- Theme tokens defined with CSS custom properties
+- Light/dark color foundation based on `prefers-color-scheme`
 
-TypeScript is already configured for the test environment with:
+### React Compiler
 
-- `vitest/globals`
-- `@testing-library/jest-dom`
+The stable `reactCompiler` option is enabled in `next.config.ts`:
 
-Commands:
-
-```bash
-pnpm test
-pnpm test:watch
-pnpm test:coverage
+```ts
+const nextConfig: NextConfig = {
+  reactCompiler: true,
+}
 ```
 
-Test files should use Vitest naming conventions such as:
+### Fonts
 
-- `*.test.ts`
-- `*.test.tsx`
-- `*.spec.ts`
-- `*.spec.tsx`
+The root layout uses `next/font/google` with:
 
-Coverage currently includes `src/**/*.{js,jsx,ts,tsx}` and excludes:
+- **Geist** (sans-serif)
+- **Geist Mono** (monospace)
 
-- declaration files
-- test files
-- `src/**/__tests__/**`
-- `src/app/layout.tsx`
-- `src/lib/env/**`
+### Security Headers
 
-Environment values for tests are provided through `.env.test`.
+Security is implemented as a two-layer architecture:
 
-`.env.test` is required to run Vitest in this repository. Next.js does not load `.env.local` when `NODE_ENV=test`, so tests will fail unless `.env.test` defines the required values, currently `NEXT_PUBLIC_APP_BASE_URL`.
+1. **Static headers** (`next.config.ts`) — applied to all routes via `buildSecurityHeaders()`:
 
-The repository includes a committed smoke test for environment loading under `src/lib/env/__tests__/env.test.ts`.
+   | Header                         | Value                                                          |
+   | ------------------------------ | -------------------------------------------------------------- |
+   | `Strict-Transport-Security`    | `max-age=63072000; includeSubDomains; preload`                 |
+   | `X-Frame-Options`              | `DENY`                                                         |
+   | `X-Content-Type-Options`       | `nosniff`                                                      |
+   | `Referrer-Policy`              | `strict-origin-when-cross-origin`                              |
+   | `Permissions-Policy`           | `camera=(), microphone=(), geolocation=(), browsing-topics=()` |
+   | `Cross-Origin-Opener-Policy`   | `same-origin`                                                  |
+   | `Cross-Origin-Embedder-Policy` | `unsafe-none`                                                  |
+   | `Cross-Origin-Resource-Policy` | `same-origin`                                                  |
+   | `X-DNS-Prefetch-Control`       | `on`                                                           |
 
-### Continuous Integration
+2. **Per-request CSP** (`src/proxy.ts`) — generates a fresh 128-bit nonce for every HTML response and injects a strict `Content-Security-Policy` header. The nonce is forwarded to server components via the `x-nonce` request header.
 
-CI is configured with GitHub Actions in `.github/workflows/ci.yml`.
+   In development, `'unsafe-eval'` and `'unsafe-inline'` are added for HMR compatibility.
 
-The workflow runs on:
+The header builders live in `src/lib/security/headers.ts`. See `src/lib/security/HEADERS.md` for a full reference of each header and its rationale.
 
-- Pushes to `main` and `staging`
-- Pull requests targeting any branch
+### Error Boundaries
 
-A concurrency group cancels older in-progress runs for the same Git ref when a newer run starts.
+The template includes pre-built error and safety pages at the app root:
 
-CI jobs:
+| File               | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| `error.tsx`        | Catches runtime errors within the app shell |
+| `global-error.tsx` | Catches errors in the root layout itself    |
+| `not-found.tsx`    | Custom 404 page                             |
+| `loading.tsx`      | Loading state shown during navigation       |
+| `forbidden.tsx`    | Custom 403 page (requires `authInterrupts`) |
+| `unauthorized.tsx` | Custom 401 page (requires `authInterrupts`) |
 
-| Job           | Commands                         | Notes                                                                     |
-| ------------- | -------------------------------- | ------------------------------------------------------------------------- |
-| Lint & Format | `pnpm lint`, `pnpm format:check` | Runs ESLint and verifies Prettier formatting                              |
-| Type Check    | `pnpm type-check`                | Runs TypeScript with `tsc --noEmit`                                       |
-| Unit Tests    | `pnpm test:coverage`             | Generates `.env.test` first with `.github/scripts/generate-env-test.sh`   |
-| Build         | `pnpm build`                     | Runs after linting, type checking, and tests pass; restores `.next/cache` |
+> **Note:** `forbidden.tsx` and `unauthorized.tsx` require the `authInterrupts` experimental flag. To enable it, uncomment the block in `next.config.ts`:
+>
+> ```ts
+> experimental: {
+>   authInterrupts: true,
+> }
+> ```
 
-All CI jobs use the local composite action in `.github/actions/setup`, which installs PNPM 10.30.0, sets up Node.js 22 with PNPM caching, and installs dependencies with `pnpm install --frozen-lockfile`.
+### SEO
 
-The test job generates a safe `.env.test` file in CI with:
+Programmatic SEO files are included under `src/app/`:
 
-- `NODE_ENV=test`
-- `NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000`
+- **`robots.ts`** — generates `/robots.txt` allowing all crawlers with a sitemap reference
+- **`sitemap.ts`** — generates `/sitemap.xml` with static pages (extend as routes are added)
 
-Because CI runs Vitest coverage, the committed environment smoke test prevents the `Unit Tests` job from failing due to an empty test suite.
-
-### Git Hooks
-
-Git hooks are managed with Husky and installed automatically by `pnpm install` through the `prepare` script.
-
-Configured hooks:
-
-- `pre-commit` validates the current branch name and runs `lint-staged`
-- `commit-msg` runs Commitlint with `@commitlint/config-conventional`
-- `pre-push` runs `pnpm type-check`
-
-`lint-staged` currently applies:
-
-- `eslint --fix` to `*.{js,mjs,cjs,ts,tsx}`
-- `prettier --write` to `*.{js,mjs,cjs,ts,tsx,json,md,css}`
-
-Branch names must follow:
-
-```text
-<type>/<scope-description>
-```
-
-Allowed branch types: `feat`, `fix`, `style`, `refactor`, `chore`, `test`, `build`, `ci`, `docs`, `perf`
-
-Special allowed branch: `staging`
-
-Example branch names:
-
-- `chore/code-quality-setup`
-- `docs/readme-update`
-- `feat/auth-setup`
-
-Commit messages follow the Conventional Commits format. Example:
-
-```text
-feat(auth): add login form
-```
+Both files read `NEXT_PUBLIC_APP_BASE_URL` from the validated environment.
 
 ### Environment Variables
 
 Environment variables are centralized in `src/lib/env/index.ts` using `@t3-oss/env-nextjs` and `zod`.
 
-Current environment contract:
+Current contract:
 
 | Variable                   | Scope  | Validation                          | Description                         |
 | -------------------------- | ------ | ----------------------------------- | ----------------------------------- |
@@ -252,13 +281,13 @@ Current environment contract:
 
 Implementation details:
 
-- `shared` is used for values available on both server and client
-- `client` is used for browser-safe variables and requires the `NEXT_PUBLIC_` prefix
-- `experimental__runtimeEnv` maps runtime values for client-safe access in Next.js
-- `emptyStringAsUndefined: true` treats empty environment values as missing
-- `.env.test` provides the baseline environment required by the Vitest setup and must exist locally for test runs
+- `shared` — values available on both server and client
+- `client` — browser-safe variables requiring the `NEXT_PUBLIC_` prefix
+- `experimental__runtimeEnv` — maps runtime values for client-safe access
+- `emptyStringAsUndefined: true` — treats empty values as missing
+- `skipValidation` — controlled by the `SKIP_ENV_VALIDATION` env var; defers Zod validation to runtime (server startup) instead of build time
 
-Use the exported `env` object instead of reading `process.env` directly in app code:
+Use the exported `env` object instead of reading `process.env` directly:
 
 ```ts
 import { env } from "@/lib/env"
@@ -266,116 +295,123 @@ import { env } from "@/lib/env"
 const baseUrl = env.NEXT_PUBLIC_APP_BASE_URL
 ```
 
-### Tailwind CSS
+### API Routes
 
-Tailwind CSS 4 is configured through `postcss.config.mjs` and imported in `src/app/globals.css`.
+| Endpoint      | Method | Description                              |
+| ------------- | ------ | ---------------------------------------- |
+| `/api/health` | `GET`  | Returns `{ ok: true, timestamp: "..." }` |
 
-The template currently uses:
+The health endpoint is used by the Docker `HEALTHCHECK` instruction.
 
-- `@import "tailwindcss"`
-- Theme tokens defined with CSS custom properties
-- A simple light/dark color foundation based on `prefers-color-scheme`
+### Testing
 
-### React Compiler
+Testing is configured with Vitest and React Testing Library.
 
-`next.config.ts` enables the stable `reactCompiler` option:
+Setup includes:
 
-```ts
-const nextConfig = {
-  reactCompiler: true,
-}
-```
-
-This aligns the template with modern React and Next.js optimization defaults.
-
-### Fonts
-
-The root layout uses `next/font/google` with:
-
-- `Geist`
-- `Geist Mono`
-
-## Tooling Status
-
-This section is intentionally separated so it can grow over time.
-
-| Area               | Status   | Notes                      |
-| ------------------ | -------- | -------------------------- |
-| Next.js App Router | Included | `src/app` based structure  |
-| TypeScript         | Included | Strict configuration       |
-| ESLint             | Included | Flat config + custom rules |
-| Prettier           | Included | Project-wide formatting    |
-| Git hooks          | Included | Husky + lint-staged        |
-| Environment vars   | Included | T3 Env + Zod               |
-| Testing            | Included | Vitest + Testing Library   |
-| Docker             | Included | Standalone image + Compose |
-| CI                 | Included | GitHub Actions workflow    |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js `>=22.12.0`
-- PNPM `10.30.0`
-
-If you use Corepack, you can enable PNPM with:
+- `vitest.config.mts` with `@vitejs/plugin-react`
+- `jsdom` as the test environment
+- `globals: true` — `describe`, `it`, `expect` available without imports
+- `vitest.setup.ts` loading `@testing-library/jest-dom/vitest`
+- `@next/env` loading environment variables before tests
+- V8 coverage reporting to `coverage/`
+- CI-specific reporters: `verbose` + `github-actions`
 
 ```bash
-corepack enable
+pnpm test            # run once
+pnpm test:watch      # watch mode
+pnpm test:coverage   # run with coverage
 ```
 
-### Install Dependencies
+Test files use Vitest naming conventions: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`.
 
-```bash
-pnpm install
+Coverage includes `src/**/*.{js,jsx,ts,tsx}` and excludes declaration files, test files, `src/**/__tests__/**`, `src/app/layout.tsx`, and `src/lib/env/**`.
+
+> **Note:** `.env.test` is required to run tests locally. Next.js does not load `.env.local` when `NODE_ENV=test`, so tests will fail unless `.env.test` defines the required values. CI generates this file automatically.
+
+### Git Hooks
+
+Git hooks are managed with [Husky](https://typicode.github.io/husky/) and installed automatically via the `prepare` script.
+
+| Hook         | Action                                                 |
+| ------------ | ------------------------------------------------------ |
+| `pre-commit` | Validates the branch name, then runs `lint-staged`     |
+| `commit-msg` | Runs Commitlint with `@commitlint/config-conventional` |
+| `pre-push`   | Runs `pnpm type-check` and `pnpm test`                 |
+
+`lint-staged` applies:
+
+- `eslint --fix` to `*.{js,mjs,cjs,ts,tsx}`
+- `prettier --write` to `*.{js,mjs,cjs,ts,tsx,json,md,css}`
+
+#### Branch Naming
+
+Branch names must follow:
+
+```text
+<type>/<scope-description>
 ```
 
-### Set Up Environment Variables
+Allowed types: `feat`, `fix`, `style`, `refactor`, `chore`, `test`, `build`, `ci`, `docs`, `perf`
 
-```bash
-cp .env.example .env.local
-cp .env.example .env.test
+Special allowed branch: `staging`
+
+Examples: `feat/auth-setup`, `docs/readme-update`, `chore/code-quality-setup`
+
+#### Commit Messages
+
+Commits follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```text
+feat(auth): add login form
 ```
 
-The example file currently defines:
+### Continuous Integration
 
-- `NODE_ENV`
-- `NEXT_PUBLIC_APP_BASE_URL`
+CI is configured with GitHub Actions in `.github/workflows/ci.yml`.
 
-`.env.local` is used for local app development and as the runtime env file in the current Docker Compose template. `.env.test` is required for `pnpm test` and `pnpm test:coverage`.
+Triggers:
 
-### Start the Development Server
+- Pushes to `main` and `staging`
+- Pull requests targeting any branch
 
-```bash
-pnpm dev
-```
+A concurrency group cancels older in-progress runs for the same ref.
 
-Then open `http://localhost:3000`.
+| Job              | Commands                         | Notes                                                                                |
+| ---------------- | -------------------------------- | ------------------------------------------------------------------------------------ |
+| Lint & Format    | `pnpm lint`, `pnpm format:check` | Runs ESLint and verifies Prettier formatting                                         |
+| Type Check       | `pnpm type-check`                | Runs TypeScript with `tsc --noEmit`                                                  |
+| Unit Tests       | `pnpm test:coverage`             | Generates `.env.test` first via `.github/scripts/generate-env-test.sh`               |
+| Dependency Audit | `pnpm audit:dependencies`        | Runs `pnpm audit` at moderate severity level                                         |
+| CodeQL           | `github/codeql-action`           | Static analysis for JavaScript/TypeScript security vulnerabilities                   |
+| Build            | `pnpm build`                     | Runs with `SKIP_ENV_VALIDATION=1`; restores `.next/cache`; depends on all other jobs |
 
-### Build for Production
+All jobs use the composite action at `.github/actions/setup`, which installs PNPM 10.30.0, sets up Node.js 22 with caching, and runs `pnpm install --frozen-lockfile`.
 
-```bash
-pnpm build
-```
+### Dependabot
 
-### Start the Production Server
+Automated dependency updates are configured in `.github/dependabot.yml` with weekly schedules for:
 
-```bash
-pnpm start
-```
+- **npm** — grouped by ecosystem (Next.js, React, testing, lint/format, types)
+- **GitHub Actions** — keeps CI action versions current
+- **Docker** — updates base image references
 
-### Run With Docker
+### GitHub Templates
+
+A pull request template is included at `.github/PULL_REQUEST_TEMPLATE.md` with sections for summary, changes, reviewer notes, testing instructions, and a checklist.
+
+## Docker
 
 The `Dockerfile` is a multi-stage build with two usable targets:
 
 | Target   | Purpose                               |
 | -------- | ------------------------------------- |
 | `dev`    | Development server with hot-reload    |
-| `runner` | Production-optimised standalone image |
+| `runner` | Production-optimized standalone image |
 
-`docker-compose.yml` ships configured for **production** by default.
+`docker-compose.yml` is configured for **production** by default.
 
-#### Production
+### Production
 
 ```bash
 docker compose up --build
@@ -384,17 +420,23 @@ docker compose up --build
 Or build and run the image directly:
 
 ```bash
-docker build --target runner -t nextjs-starter-template .
+docker build --target runner \
+  --build-arg NEXT_PUBLIC_APP_BASE_URL=https://example.com \
+  -t nextjs-starter-template .
 docker run --rm -p 3000:3000 --env-file .env.local nextjs-starter-template
 ```
 
-#### Development
+> `NEXT_PUBLIC_APP_BASE_URL` must be passed as a `--build-arg` because Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle at build time.
 
-To use Docker for development, edit `docker-compose.yml` with the following changes:
+The production image includes a `HEALTHCHECK` that polls `/api/health` every 30 seconds.
+
+### Development
+
+To use Docker for development, edit `docker-compose.yml`:
 
 - Change `target` from `runner` to `dev`
 - Change `NODE_ENV` from `production` to `development`
-- Add a `volumes` block to mount your source code into the container:
+- Add a `volumes` block:
 
 ```yaml
 volumes:
@@ -403,88 +445,81 @@ volumes:
   - /app/.next
 ```
 
-Then start the container:
+Then start:
 
 ```bash
 docker compose up --build
 ```
 
-### Run Linting
-
-```bash
-pnpm lint
-```
-
-### Run Tests
-
-```bash
-pnpm test
-```
-
-For watch mode or coverage:
-
-```bash
-pnpm test:watch
-pnpm test:coverage
-```
-
-The repository includes a committed environment smoke test so the default test command has at least one test file to run.
-
 ## Available Scripts
 
-Current scripts from `package.json`:
+| Script                    | Description                               |
+| ------------------------- | ----------------------------------------- |
+| `pnpm dev`                | Start the Next.js development server      |
+| `pnpm build`              | Create a production build                 |
+| `pnpm start`              | Run the production server                 |
+| `pnpm lint`               | Run ESLint                                |
+| `pnpm lint:fix`           | Run ESLint with auto-fixes                |
+| `pnpm format`             | Format files with Prettier                |
+| `pnpm format:check`       | Check formatting with Prettier            |
+| `pnpm test`               | Run the Vitest test suite                 |
+| `pnpm test:watch`         | Run Vitest in watch mode                  |
+| `pnpm test:coverage`      | Run tests with coverage reporting         |
+| `pnpm type-check`         | Run TypeScript type checking              |
+| `pnpm audit:dependencies` | Audit dependencies at moderate severity   |
+| `pnpm clean`              | Remove `.next` and `coverage` directories |
+| `pnpm prepare`            | Install Husky Git hooks                   |
 
-| Script               | Description                          |
-| -------------------- | ------------------------------------ |
-| `pnpm dev`           | Start the Next.js development server |
-| `pnpm build`         | Create a production build            |
-| `pnpm start`         | Run the production server            |
-| `pnpm lint`          | Run ESLint                           |
-| `pnpm lint:fix`      | Run ESLint with auto-fixes           |
-| `pnpm format`        | Format files with Prettier           |
-| `pnpm format:check`  | Check formatting with Prettier       |
-| `pnpm test`          | Run the Vitest test suite            |
-| `pnpm test:watch`    | Run Vitest in watch mode             |
-| `pnpm test:coverage` | Run tests with coverage reporting    |
-| `pnpm type-check`    | Run TypeScript type checking         |
-| `pnpm prepare`       | Install Husky Git hooks              |
+## Tooling Status
+
+| Area               | Status   | Notes                                        |
+| ------------------ | -------- | -------------------------------------------- |
+| Next.js App Router | Included | `src/app` based structure                    |
+| TypeScript         | Included | Strict configuration                         |
+| ESLint             | Included | Flat config with custom rules                |
+| Prettier           | Included | Project-wide formatting                      |
+| Tailwind CSS       | Included | v4 with theme tokens and dark mode           |
+| React Compiler     | Included | Enabled in `next.config.ts`                  |
+| Security headers   | Included | Static headers + per-request nonce-based CSP |
+| Error boundaries   | Included | Custom error, 404, 403, 401, and loading     |
+| SEO                | Included | Programmatic `robots.ts` and `sitemap.ts`    |
+| Environment vars   | Included | T3 Env + Zod with skip-validation support    |
+| Testing            | Included | Vitest + Testing Library + V8 coverage       |
+| Git hooks          | Included | Husky + lint-staged + Commitlint             |
+| Docker             | Included | Standalone image + Compose                   |
+| CI                 | Included | GitHub Actions (lint, test, build, audit)    |
+| CodeQL             | Included | Static security analysis                     |
+| Dependabot         | Included | Weekly updates for npm, Actions, and Docker  |
 
 ## Project Notes
 
 ### Package Manager
 
-The repository is configured to use PNPM via the `packageManager` field in `package.json`.
+The repository uses PNPM via the `packageManager` field in `package.json`. Corepack is recommended.
 
 ### Workspace File
 
-`pnpm-workspace.yaml` currently contains ignored built dependencies used by the local setup.
+`pnpm-workspace.yaml` contains ignored built dependencies used by the local setup.
 
 ### Environment Files
 
-Environment files are ignored by default via `.gitignore`:
-
-```text
-.env*
-```
-
-Use `.env.example` as the starting point for local configuration:
+All `.env*` files are gitignored. Use `.env.example` as the starting point:
 
 ```bash
-cp .env.example .env.local
-cp .env.example .env.test
+cp .env.example .env.local    # local development / Docker runtime
+cp .env.example .env.test     # required for running tests
 ```
 
-`.env.test` is required for the Vitest setup in this repository. It is ignored by git with the other `.env*` files, so create it locally before running tests.
+CI generates `.env.test` automatically; local test runs still require creating it yourself.
 
-CI generates `.env.test` automatically before running coverage; local test runs still require creating it yourself.
+### Auth Interrupts
 
-When adding new environment variables, update:
+The `forbidden()` and `unauthorized()` functions (and their corresponding pages) require the `authInterrupts` experimental flag. This is disabled by default. See the [Error Boundaries](#error-boundaries) section for instructions.
 
-- `.env.example`
-- `.env.local`
-- `.env.test` if tests need the variable
-- `src/lib/env/index.ts`
+## Contributing
 
-## Contributing To The Template
+When extending the template, keep this README updated alongside any new setup so it stays self-documenting. Follow the branch naming and commit message conventions enforced by the Git hooks.
 
-As this repository matures, keep the README updated alongside any new setup so the template stays self-documenting.
+## License
+
+This project is open source. See the repository for license details.
