@@ -16,7 +16,10 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    # Runtime environment file. Override with `--env-file` or replace this
+    # path for production deployments (e.g. `.env`, `.env.production`).
+    # The file is gitignored — see `.env.example` for the documented contract.
     env_file:
-      - .env.local # don't forget to create your environment variables file
+      - .env.local
     environment:
       - NODE_ENV=production

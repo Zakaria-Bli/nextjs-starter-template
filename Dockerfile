@@ -49,6 +49,9 @@ FROM base AS builder
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Skip t3-env Zod validation at build time; the server validates on startup.
+ENV SKIP_ENV_VALIDATION=1
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -84,6 +87,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget --spider -q "http://127.0.0.1:${PORT}/api/health" || exit 1
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
