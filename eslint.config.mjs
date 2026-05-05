@@ -1,13 +1,13 @@
+import { fixupConfigRules } from "@eslint/compat"
 import js from "@eslint/js"
 import { defineConfig, globalIgnores } from "eslint/config"
 import nextVitals from "eslint-config-next/core-web-vitals"
 import nextTs from "eslint-config-next/typescript"
-import importPlugin from "eslint-plugin-import"
 
 const eslintConfig = defineConfig(
   js.configs.recommended,
-  ...nextVitals,
-  ...nextTs,
+  ...fixupConfigRules(nextVitals),
+  ...fixupConfigRules(nextTs),
   globalIgnores([
     ".next/**",
     "out/**",
@@ -17,9 +17,6 @@ const eslintConfig = defineConfig(
     "src/components/ui/**/*",
   ]),
   {
-    plugins: {
-      import: importPlugin,
-    },
     rules: {
       "no-console": ["warn", { allow: ["warn", "error"] }],
 
