@@ -1,5 +1,5 @@
 # syntax=docker.io/docker/dockerfile:1
-ARG NODE_VERSION=22.12.0
+ARG NODE_VERSION=22.22.2
 ARG PNPM_VERSION=10.30.0
 
 # ---------------------------
