@@ -1,12 +1,20 @@
+auditConfig:
+  # Temporary: braces@3.0.3 (GHSA-vfj7-8cjw-p6xm / CVE-2026-93687) remains in two dev-tool paths.
+  # No patched release exists; recheck upstream and remove this exception by 2026-11-07.
+  ignoreCves:
+    - CVE-2026-93687
+
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
 
 overrides:
-  "@babel/core": "7.29.7"
-  postcss: "8.5.26"
-  nanoid: "3.3.18"
-  fast-uri: "3.1.5"
-  js-yaml: "4.3.1"
-  "minimatch@3.1.5>brace-expansion": "1.1.18"
-  "minimatch@10.2.5>brace-expansion": "5.0.9"
+  "@babel/core": 7.29.7
+  "@tailwindcss/language-service>postcss-selector-parser": 7.1.6
+  fast-uri: 3.1.8
+  js-yaml: 4.3.2
+  minimatch@10.2.6>brace-expansion: 5.0.12
+  minimatch@3.1.5>brace-expansion: 1.1.21
+  nanoid: 3.3.18
+  postcss: 8.5.26
+  source-map-js: 1.2.2

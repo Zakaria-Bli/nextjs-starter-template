@@ -8,9 +8,9 @@ A production-ready starter template for building modern Next.js applications. Pr
 - **React 19** with the React Compiler enabled
 - **TypeScript** in strict mode
 - **Tailwind CSS 4** with theme tokens and dark mode support
-- **ESLint 9** with flat config and custom project rules
+- **ESLint 10** with flat config and custom project rules
 - **Prettier 3** with Tailwind-aware formatting
-- **Vitest 4** with React Testing Library, jsdom, and V8 coverage
+- **Vitest 5** with React Testing Library, jsdom, and V8 coverage
 - **Security headers** — HSTS, CSP with per-request nonces, COOP, COEP, and more
 - **Error boundaries** — custom `error`, `not-found`, `forbidden`, `unauthorized`, and `global-error` pages
 - **SEO** — programmatic `robots.ts` and `sitemap.ts`
