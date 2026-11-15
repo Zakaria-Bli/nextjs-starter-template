@@ -10,6 +10,8 @@ export default function Home() {
           alt="Next.js logo"
           width={100}
           height={20}
+          // Suppress Next Image's inline color style; strict CSP blocks style attributes.
+          style={{ color: "" }}
           priority
         />
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
@@ -46,7 +48,8 @@ export default function Home() {
               src="/vercel.svg"
               alt="Vercel logomark"
               width={16}
-              height={16}
+              height={14}
+              style={{ color: "" }}
             />
             Deploy Now
           </a>

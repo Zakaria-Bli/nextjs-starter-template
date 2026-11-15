@@ -33,12 +33,7 @@ export default function GlobalError({ error, unstable_retry }: GlobalErrorProps)
         <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-24">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-[0.05]"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-            }}
+            className="status-grid pointer-events-none absolute inset-0 bg-size-[56px_56px] opacity-[0.05]"
           />
 
           <div className="relative flex w-full max-w-2xl flex-col gap-10">
@@ -50,32 +45,17 @@ export default function GlobalError({ error, unstable_retry }: GlobalErrorProps)
               <span className="text-zinc-500">500</span>
             </div>
 
-            <h1
-              style={{
-                fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
-              }}
-              className="text-4xl leading-[1.05] font-light tracking-tight text-balance sm:text-5xl"
-            >
+            <h1 className="font-sans text-4xl leading-[1.05] font-light tracking-tight text-balance sm:text-5xl">
               The application encountered a fatal error and could not continue.
             </h1>
 
-            <p
-              style={{
-                fontFamily: "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace",
-              }}
-              className="max-w-lg text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
-            >
+            <p className="max-w-lg font-mono text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
               This is the root error boundary. The page&rsquo;s layout has been replaced. You can
               attempt a recovery, or reload the document.
             </p>
 
             {error?.digest && (
-              <dl
-                style={{
-                  fontFamily: "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace",
-                }}
-                className="inline-flex flex-col gap-1 border-l border-zinc-300 pl-4 text-[11px] tracking-wider uppercase dark:border-zinc-700"
-              >
+              <dl className="inline-flex flex-col gap-1 border-l border-zinc-300 pl-4 font-mono text-[11px] tracking-wider uppercase dark:border-zinc-700">
                 <dt className="text-zinc-500">Digest</dt>
                 <dd className="text-zinc-950 normal-case dark:text-zinc-50">{error.digest}</dd>
               </dl>
@@ -83,12 +63,7 @@ export default function GlobalError({ error, unstable_retry }: GlobalErrorProps)
 
             <div aria-hidden="true" className="h-px w-full bg-zinc-200 dark:bg-zinc-800" />
 
-            <div
-              style={{
-                fontFamily: "var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace",
-              }}
-              className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6"
-            >
+            <div className="flex flex-col gap-3 font-mono sm:flex-row sm:items-center sm:gap-6">
               <button
                 type="button"
                 onClick={() => unstable_retry()}

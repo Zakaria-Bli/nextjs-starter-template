@@ -5,12 +5,7 @@ export default function Unauthorized() {
     <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-zinc-50 px-6 py-24 text-zinc-950 dark:bg-black dark:text-zinc-50">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
+        className="status-grid pointer-events-none absolute inset-0 bg-size-[48px_48px] opacity-[0.04] dark:opacity-[0.06]"
       />
 
       <main className="relative grid w-full max-w-5xl grid-cols-1 gap-12 sm:grid-cols-12">

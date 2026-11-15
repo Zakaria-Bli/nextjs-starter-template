@@ -232,7 +232,7 @@ Security is implemented as a two-layer architecture:
    | `Cross-Origin-Resource-Policy` | `same-origin`                                                  |
    | `X-DNS-Prefetch-Control`       | `on`                                                           |
 
-2. **Per-request CSP** (`src/proxy.ts`) — generates a fresh 128-bit nonce for every HTML response and injects a strict `Content-Security-Policy` header. The nonce is forwarded to server components via the `x-nonce` request header.
+2. **Per-request CSP** (`src/proxy.ts`) — generates a fresh 128-bit nonce for every HTML response and injects a strict `Content-Security-Policy` header. The nonce is forwarded to server components via the `x-nonce` request header. The root layout calls `connection()` so HTML renders per request with matching script nonces; HTML pages are not statically generated or CDN-cacheable.
 
    In development, `'unsafe-eval'` and `'unsafe-inline'` are added for HMR compatibility.
 
@@ -321,6 +321,21 @@ Setup includes:
 pnpm test            # run once
 pnpm test:watch      # watch mode
 pnpm test:coverage   # run with coverage
+```
+
+Production smoke checks verify matching, fresh CSP nonces, framework assets, the home page, 404 page, health endpoint, and metadata routes. After building and starting the production server, run:
+
+```bash
+pnpm test:smoke http://localhost:3000
+```
+
+This command requires a running production server, not `next dev`. For local standalone testing, build with the required environment variables, then start the server in another terminal:
+
+```bash
+pnpm build
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
+HOSTNAME=127.0.0.1 PORT=3000 NEXT_PUBLIC_APP_BASE_URL=http://localhost:3000 node .next/standalone/server.js
 ```
 
 Test files use Vitest naming conventions: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`.
@@ -465,6 +480,7 @@ docker compose up --build
 | `pnpm test`               | Run the Vitest test suite                 |
 | `pnpm test:watch`         | Run Vitest in watch mode                  |
 | `pnpm test:coverage`      | Run tests with coverage reporting         |
+| `pnpm test:smoke [url]`   | Check a running production server         |
 | `pnpm type-check`         | Run TypeScript type checking              |
 | `pnpm audit:dependencies` | Audit dependencies at moderate severity   |
 | `pnpm clean`              | Remove `.next` and `coverage` directories |
