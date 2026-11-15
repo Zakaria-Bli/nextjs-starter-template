@@ -9,12 +9,7 @@ export default function Loading() {
       {/* Hairline grid */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.05] dark:opacity-[0.08]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
+        className="status-grid pointer-events-none absolute inset-0 bg-size-[64px_64px] opacity-[0.05] dark:opacity-[0.08]"
       />
 
       <div className="relative flex w-full max-w-3xl flex-col items-start gap-12">

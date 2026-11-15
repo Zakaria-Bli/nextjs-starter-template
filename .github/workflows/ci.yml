@@ -83,6 +83,30 @@ jobs:
         env:
           SKIP_ENV_VALIDATION: 1
 
+      - name: Smoke test production server
+        env:
+          HOSTNAME: 127.0.0.1
+          PORT: 3000
+          NEXT_PUBLIC_APP_BASE_URL: http://127.0.0.1:3000
+        run: |
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+          node .next/standalone/server.js > "$RUNNER_TEMP/smoke-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true; tail -n 100 "$RUNNER_TEMP/smoke-server.log"' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/api/health > /dev/null; then
+              pnpm test:smoke http://127.0.0.1:3000
+              exit 0
+            fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Production server did not become ready within 30 seconds."
+          exit 1
+
   dependency-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
