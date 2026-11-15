@@ -24,7 +24,7 @@ for (const [path, status] of [
   nonces.add(nonce)
 
   const html = await response.text()
-  const scripts = html.match(/<script\b[^>]*>/g) ?? []
+  const scripts = html.match(/<script\b[^>]*>/gi) ?? []
   assert.ok(scripts.length > 0, `${path}: missing framework scripts`)
   for (const script of scripts) {
     assert.ok(script.includes(`nonce="${nonce}"`), `${path}: script without matching nonce`)
